@@ -1,0 +1,34 @@
+body {
+    font-family: sans-serif;
+    text-align: center;
+    background-color: #f0f0f0;
+    margin-top: 50px;
+}
+
+#game-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    display: inline-block;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#click-button {
+    padding: 10px 20px;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+#click-button:hover {
+    background-color: #0056b3;
+}
+
+#score {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #333;
+}
