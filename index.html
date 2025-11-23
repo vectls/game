@@ -1,21 +1,40 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My GitHub Pages Game</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ゲームポータル</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #eee;
+      font-family: "Segoe UI", sans-serif;
+      text-align: center;
+      padding-top: 100px;
+    }
+    h1 {
+      font-size: 48px;
+      margin-bottom: 40px;
+    }
+    a {
+      display: inline-block;
+      margin: 20px;
+      padding: 15px 30px;
+      background-color: #444;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 24px;
+      transition: background-color 0.3s;
+    }
+    a:hover {
+      background-color: #1e90ff;
+    }
+  </style>
 </head>
 <body>
-    <h1>クリックカウンターゲーム</h1>
-    <p>ボタンをクリックしてスコアを稼ごう！</p>
-    
-    <div id="game-container">
-        <p>現在のスコア: <span id="score">0</span></p>
-        <button id="click-button">クリック！</button>
-    </div>
-
-    <!-- main.js を読み込む -->
-    <script src="main.js"></script>
+  <h1>ゲームポータル</h1>
+  <a href="./game/">Game</a>
+  <a href="./game1/">Game 1</a>
 </body>
 </html>
