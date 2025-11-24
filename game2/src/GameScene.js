@@ -1,19 +1,11 @@
+import { ASSET_KEYS } from "./ASSET_KEYS.js"; // ★修正: ASSET_KEYSをインポート
 import Player from "./Player.js";
 import Enemy from "./Enemy.js";
 import Laser from "./Laser.js";
 import Missile from "./Missile.js";
 
 // --- 設定定数 ---
-const ASSET_KEYS = {
-  ATLAS: "space",
-  BACKGROUND: "background",
-  SPRITES: {
-    PLAYER: "playerShip1_blue.png",
-    ENEMY_GREEN: "enemyGreen1.png",
-    ENEMY_RED: "enemyRed1.png",
-    ENEMY_BLUE: "enemyBlue2.png",
-  },
-};
+// ASSET_KEYS の定義は削除（ASSET_KEYS.js に移動）
 
 const GAME_CONFIG = {
   WIDTH: 800,
@@ -55,10 +47,6 @@ export default class GameScene extends Phaser.Scene {
     this.enemies = null;
     this.enemyMissiles = null;
     this.cursors = null;
-
-    // UI
-    this.scoreText = null;
-    this.playerHealthText = null;
   }
 
   preload() {
@@ -77,14 +65,18 @@ export default class GameScene extends Phaser.Scene {
     this.spawnEnemies();
     this.setupInputs();
     this.setupCollisions();
-    this.createUI();
+
+    // ★追加: UIシーンを起動（初期データを第2引数で渡すのがコツ！）
+    this.scene.launch("UIScene", { 
+        score: this.score, 
+        health: this.player.health 
+    });
   }
 
   update() {
     if (this.isGameOver || this.isGameClear) return;
 
     this.player.update(this.cursors);
-    this.updateUI();
 
     // ゲームクリア判定
     if (this.enemies.countActive(true) === 0) {
@@ -105,6 +97,9 @@ export default class GameScene extends Phaser.Scene {
       classType: Laser,
       maxSize: 10,
       runChildUpdate: true,
+      // ★修正: Groupにテクスチャとフレームを設定
+      key: ASSET_KEYS.ATLAS,
+      frame: ASSET_KEYS.SPRITES.LASER_PLAYER,
     });
 
     this.enemies = this.physics.add.group({
@@ -116,6 +111,9 @@ export default class GameScene extends Phaser.Scene {
       classType: Missile,
       maxSize: 20,
       runChildUpdate: true,
+      // ★修正: Groupにテクスチャとフレームを設定
+      key: ASSET_KEYS.ATLAS,
+      frame: ASSET_KEYS.SPRITES.LASER_ENEMY,
     });
   }
 
@@ -157,10 +155,6 @@ export default class GameScene extends Phaser.Scene {
             ease: "Sine.easeInOut",
             yoyo: true,
             repeat: -1,
-            onRepeat: () => {
-               // 敵がアクティブなときのみ発射
-               if(enemy.active) enemy.fireMissile(this.player.x, this.player.y);
-            },
           })
         );
         break;
@@ -196,15 +190,6 @@ export default class GameScene extends Phaser.Scene {
     this.physics.add.overlap(this.enemyMissiles, this.player, this.handleHitPlayer, null, this);
   }
 
-  createUI() {
-    this.scoreText = this.add.text(16, 16, `Score: ${this.score}`, UI_STYLES.DEFAULT);
-    this.playerHealthText = this.add.text(
-      16,
-      48,
-      `Player Health: ${this.player.health}`,
-      UI_STYLES.DEFAULT
-    );
-  }
   // #endregion
 
   // ----------------------------------------------------------------
@@ -212,22 +197,25 @@ export default class GameScene extends Phaser.Scene {
   // ----------------------------------------------------------------
 
   updateUI() {
-    // 無駄な描画更新を防ぐため、値が変わった時だけ更新するのがベストですが、
-    // 簡易化のためここでは毎フレーム更新（最適化の余地あり）
-    this.playerHealthText.setText(`Player Health: ${this.player.health}`);
+    // 削除：UISceneに移動したため不要
   }
 
   handleHitEnemy(laser, enemy) {
-    laser.destroy();
+    // 【修正】destroy() ではなく disableBody(true, true) を使って、
+    // オブジェクトプール（Group）に再利用可能として戻します。
+    laser.disableBody(true, true);
     
     // 既に死んでいる敵に当たった場合のガード
     if (!enemy.active) return;
 
     enemy.takeDamage(1);
 
-    if (!enemy.active) {
+if (!enemy.active) {
       this.playExplosion(enemy.x, enemy.y);
-      this.addScore(GAME_CONFIG.SCORE_PER_ENEMY);
+      this.score += GAME_CONFIG.SCORE_PER_ENEMY;
+      
+      // イベントを飛ばす
+      this.events.emit("updateScore", this.score);
     }
   }
 
@@ -238,6 +226,9 @@ export default class GameScene extends Phaser.Scene {
 
     player.takeDamage(1);
 
+    // 体力が減ったことを通知
+    this.events.emit("updateHealth", player.health);
+
     if (!player.active) {
       this.playExplosion(player.x, player.y);
       this.handleGameOver();
@@ -245,8 +236,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   addScore(points) {
-    this.score += points;
-    this.scoreText.setText(`Score: ${this.score}`);
+    // 削除：スコア加算はhandleHitEnemyに集約
   }
 
   playExplosion(x, y) {

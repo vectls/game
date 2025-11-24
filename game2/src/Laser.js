@@ -5,10 +5,10 @@ class Laser extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
   }
 
-  fire(x, y, speedY) {
-    this.body.reset(x, y);
-    this.setActive(true);
-    this.setVisible(true);
+fire(x, y, speedY) {
+    // 物理ボディを有効化し、新しい開始位置 (x, y) にリセット
+    this.enableBody(true, x, y, true, true); 
+    
     this.setVelocityY(speedY);
   }
 
